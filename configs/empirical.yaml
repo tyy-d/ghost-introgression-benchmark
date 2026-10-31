@@ -1,0 +1,20 @@
+name: empirical
+release: "3.0"
+sample_sets: [AG1000G-BF-A, AG1000G-BF-B, AG1000G-BF-C]
+country: Burkina Faso
+target_species: gambiae
+reference_species: coluzzii
+samples_per_population: 20
+chromosome: 3L
+start: 10000000
+end: 12000000
+site_mask: gamb_colu_arab
+analysis: gamb_colu
+window_size: 50000
+# Fill from a documented literature source before empirical inference.
+# No human or software-validation defaults are silently substituted.
+mutation_rate: null
+recombination_rate: null
+effective_size: null
+trace_time: null
+parameter_source: null

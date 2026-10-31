@@ -1,0 +1,11 @@
+name: benchmark
+base: smoke.yaml
+replicates: 10
+seed: 300000
+scenarios:
+  - {name: "null", admixture_fraction: 0.0}
+  - {name: recent, admixture_fraction: 0.05, admixture_time: 500}
+  - {name: baseline, admixture_fraction: 0.05, admixture_time: 2000}
+  - {name: ancient, admixture_fraction: 0.05, admixture_time: 10000}
+  - {name: rare, admixture_fraction: 0.01, admixture_time: 2000}
+  - {name: structure, admixture_fraction: 0.0, ancestral_structure: true}

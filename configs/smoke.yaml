@@ -1,0 +1,24 @@
+name: smoke
+seed: 42
+sequence_length: 1000000
+target_diploids: 10
+reference_diploids: 10
+effective_size: 100000
+donor_split: 200000
+reference_split: 50000
+admixture_time: 2000
+admixture_fraction: 0.05
+mutation_rate: 1.0e-8
+recombination_rate: 1.0e-8
+training_windows: 2000
+validation_windows: 200
+window_size: 50000
+training_seed: 100000
+validation_seed: 200000
+trace_time: 100000
+trace_min_length: 0
+singer_samples: 20
+singer_burnin: 20
+singer_thin: 10
+replicates: 1
+# Software validation parameters, not biological estimates for Anopheles.

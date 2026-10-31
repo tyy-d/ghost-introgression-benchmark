@@ -1,0 +1,31 @@
+{
+  "command": [
+    "/opt/anaconda3/bin/python",
+    "/Users/thomasyi/Desktop/Cornell/jun/BIO/ghost-introgression-benchmark/.tools/singer/singer_master",
+    "-vcf",
+    "/Users/thomasyi/Desktop/Cornell/jun/BIO/ghost-introgression-benchmark/results/singer-wrapper-check/toy",
+    "-output",
+    "/Users/thomasyi/Desktop/Cornell/jun/BIO/ghost-introgression-benchmark/results/singer-wrapper-check/toy",
+    "-m",
+    "1e-8",
+    "-ratio",
+    "1",
+    "-Ne",
+    "100000",
+    "-start",
+    "0",
+    "-end",
+    "100000",
+    "-n",
+    "2",
+    "-thin",
+    "1",
+    "-seed",
+    "42",
+    "-polar",
+    "0.99"
+  ],
+  "cwd": null,
+  "seconds": 1.3449125839397311,
+  "returncode": 0
+}
