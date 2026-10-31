@@ -1,6 +1,9 @@
 name: benchmark
 base: smoke.yaml
 replicates: 10
+singer_samples: 20
+singer_burnin: 20
+singer_thin: 10
 seed: 300000
 scenarios:
   - {name: "null", admixture_fraction: 0.0}

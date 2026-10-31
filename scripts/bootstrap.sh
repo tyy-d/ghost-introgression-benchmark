@@ -6,7 +6,11 @@ export PIP_CACHE_DIR="$PWD/.cache/pip"
 export CONDA_PKGS_DIRS="$PWD/.cache/conda"
 
 # Prefer a Conda environment because the original ArchIE model is fitted in R.
-conda env create --prefix "$PWD/.tools/environment" --file environment.yml
+if [ -d .tools/environment/conda-meta ]; then
+    conda env update --prefix "$PWD/.tools/environment" --file environment.yml
+else
+    conda env create --prefix "$PWD/.tools/environment" --file environment.yml
+fi
 PYTHON="$PWD/.tools/environment/bin/python"
 PIP="$PWD/.tools/environment/bin/pip"
 export PATH="$PWD/.tools/environment/bin:$PATH"

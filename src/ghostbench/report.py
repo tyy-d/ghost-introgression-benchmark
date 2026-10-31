@@ -24,6 +24,7 @@ def create_report(output):
     keys = ["archie_inference_seconds", "trace_end_to_end_seconds"]
     axes[1].bar(["ArchIE", "SINGER + TRACE"], [runtime[key] for key in keys])
     axes[1].set(ylabel="Wall time (seconds)")
+    axes[1].set_title("Inference; ArchIE training reported separately", fontsize=10)
     fig.savefig(output / "benchmark.png", dpi=160)
     plt.close(fig)
     lines = ["# Synthetic functionality run", "",
@@ -38,6 +39,10 @@ def create_report(output):
             return "undefined" if value is None else f"{value:.3f}"
         lines.append(f"| {row['method']} | {display(row['precision'])} | "
                      f"{display(row['recall'])} | {display(row['f1'])} | {row['ambiguous_windows']} |")
+    if "archie_training_seconds_one_time" in runtime:
+        lines.extend(["", f"One-time ArchIE training: {runtime['archie_training_seconds_one_time']:.1f} s. "
+                      f"ArchIE inference: {runtime['archie_inference_seconds']:.1f} s. "
+                      f"SINGER plus TRACE inference: {runtime['trace_end_to_end_seconds']:.1f} s."])
     lines.extend(["", "![Precision–recall and runtime](benchmark.png)", "",
                   "## Limitations", "",
                   "One seed is not a performance estimate. The short SINGER chain is a smoke test, "

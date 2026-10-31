@@ -1,0 +1,47 @@
+[
+  {
+    "method": "archie",
+    "threshold": 0.5,
+    "tp_bases": 400000.0,
+    "fp_bases": 0.0,
+    "fn_bases": 0.0,
+    "tn_bases": 19200000.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "false_positive_callable_fraction": 0.0,
+    "ambiguous_windows": 8,
+    "ambiguous_callable_bases": 400000,
+    "evaluated_windows": 392
+  },
+  {
+    "method": "trace",
+    "threshold": 0.5,
+    "tp_bases": 400000.0,
+    "fp_bases": 0.0,
+    "fn_bases": 0.0,
+    "tn_bases": 19200000.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "false_positive_callable_fraction": 0.0,
+    "ambiguous_windows": 8,
+    "ambiguous_callable_bases": 400000,
+    "evaluated_windows": 392
+  },
+  {
+    "method": "trace_true_arg",
+    "threshold": 0.5,
+    "tp_bases": 400000.0,
+    "fp_bases": 0.0,
+    "fn_bases": 0.0,
+    "tn_bases": 19200000.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "false_positive_callable_fraction": 0.0,
+    "ambiguous_windows": 8,
+    "ambiguous_callable_bases": 400000,
+    "evaluated_windows": 392
+  }
+]

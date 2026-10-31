@@ -5,6 +5,7 @@
 """
 
 import importlib.util
+import json
 import os
 import time
 from concurrent.futures import ProcessPoolExecutor
@@ -125,6 +126,9 @@ def train(config, output):
         "positive_haplotypes": int((labels == 1).sum()), "seed": config["training_seed"],
         "features": matrix.shape[1], "glm_seconds": seconds,
         "total_seconds": time.monotonic() - started,
+        "target_haplotypes": 2 * config["target_diploids"],
+        "reference_haplotypes": 2 * config["reference_diploids"],
+        "window_size": config["window_size"],
     })
 
 
@@ -139,6 +143,12 @@ def predict(vcf, metadata, config, model, output, replicate="0", chromosome="1",
     if names != expected:
         raise ValueError("VCF individual order does not match sample metadata")
     count = int((metadata.population == "target").sum())
+    training = json.loads((Path(model).parent / "training_summary.json").read_text())
+    reference_count = int((metadata.population == "reference").sum())
+    if (training.get("target_haplotypes") != count
+            or training.get("reference_haplotypes") != reference_count
+            or training.get("window_size") != config["window_size"]):
+        raise ValueError("ArchIE model sample counts/window size do not match input; retrain the model")
     end = end or config["sequence_length"]
     matrix, intervals = [], []
     for left in range(start, end, config["window_size"]):

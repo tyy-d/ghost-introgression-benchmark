@@ -1,0 +1,8 @@
+{
+  "archie_inference_seconds": 3.837321125436574,
+  "singer_seconds": 35.37524320743978,
+  "trace_hmm_seconds": 23.285638249944896,
+  "trace_end_to_end_seconds": 58.660881457384676,
+  "trace_true_arg_seconds": 4.813530792016536,
+  "archie_training_seconds_one_time": 81.99866229202598
+}

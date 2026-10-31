@@ -1,5 +1,6 @@
 """Experiment orchestration and recorded provenance."""
 
+import hashlib
 import importlib.metadata
 import json
 import platform
@@ -28,9 +29,18 @@ def provenance(output):
                 commits[name] = result.stdout.strip()
     versions = {package.metadata["Name"]: package.version
                 for package in importlib.metadata.distributions()}
+    source_hash = hashlib.sha256()
+    for path in sorted((ROOT / "src").rglob("*.py")):
+        source_hash.update(str(path.relative_to(ROOT)).encode())
+        source_hash.update(path.read_bytes())
+    native = Path(trace_runner.singer_binary()).parent / "singer"
+    r_version = subprocess.run([archie.rscript(), "--version"], capture_output=True, text=True)
     write_json(Path(output) / "provenance.json", {
         "python": platform.python_version(), "platform": platform.platform(),
         "upstream_commits": commits, "packages": versions,
+        "project_source_sha256": source_hash.hexdigest(),
+        "singer_binary_sha256": hashlib.sha256(native.read_bytes()).hexdigest(),
+        "r_version": (r_version.stdout + r_version.stderr).strip(),
     })
 
 
@@ -65,6 +75,8 @@ def run(config, output, model, include_true_arg=True, thresholds=None):
     provenance(output)
     metadata = pd.read_csv(output / "inputs/samples.tsv", sep="\t")
     runtimes = {}
+    training_summary = json.loads((Path(model).parent / "training_summary.json").read_text())
+    runtimes["archie_training_seconds_one_time"] = training_summary["total_seconds"]
     started = time.monotonic()
     archie.predict(output / "inputs/sequences.vcf", metadata, config, model,
                    output / "archie", replicate=str(config["seed"]))
@@ -116,5 +128,8 @@ def benchmark(config, output, model):
             if not (path / "metrics.json").exists():
                 run(experiment, path, model, thresholds=thresholds)
             for row in json.loads((path / "metrics.json").read_text()):
-                rows.append({"scenario": scenario["name"], "replicate": replicate, **row})
+                runtime = json.loads((path / "runtime.json").read_text())
+                rows.append({"scenario": scenario["name"], "replicate": replicate, **row,
+                             "interpretation": "alternative-history call rate" if scenario.get("ancestral_structure")
+                             else "simulation accuracy", **runtime})
     pd.DataFrame(rows).to_csv(output / "benchmark.tsv", sep="\t", index=False)

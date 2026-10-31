@@ -1,6 +1,7 @@
 """Run upstream SINGER and TRACE without access to simulated ancestry labels."""
 
 import os
+import sys
 import time
 from pathlib import Path
 
@@ -26,7 +27,7 @@ def infer_arg(vcf, config, output):
     output.mkdir(parents=True, exist_ok=True)
     prefix = output / "singer"
     vcf = Path(vcf).resolve()
-    command = [singer_binary(), "-vcf", str(vcf).removesuffix(".vcf"),
+    command = [sys.executable, singer_binary(), "-vcf", str(vcf).removesuffix(".vcf"),
                "-output", str(prefix), "-m", str(config["mutation_rate"]),
                "-Ne", str(config["effective_size"]),
                "-ratio", str(config["recombination_rate"] / config["mutation_rate"]),
@@ -34,13 +35,15 @@ def infer_arg(vcf, config, output):
                "-start", "0", "-end", str(config["sequence_length"]),
                "-n", str(config["singer_samples"] + config["singer_burnin"]),
                "-thin", str(config["singer_thin"]), "-seed", str(config["seed"])]
-    seconds = run_command(command, output / "singer.log")
+    # SINGER owns <prefix>.log for recovery state. Capturing stdout there would
+    # corrupt its checkpoints, especially when the official wrapper retries.
+    seconds = run_command(command, output / "singer.stdout.log")
     # Different SINGER releases expose tree conversion as a separate tool.
     converter = Path(singer_binary()).parent / "convert_to_tskit"
     trees = sorted(output.glob("*.trees"))
     if not trees and converter.exists():
         seconds += run_command([
-            str(converter), "-input", str(prefix), "-output", str(prefix),
+            sys.executable, str(converter), "-input", str(prefix), "-output", str(prefix),
             "-start", str(config["singer_burnin"]),
             "-end", str(config["singer_samples"] + config["singer_burnin"]),
             "-step", "1",

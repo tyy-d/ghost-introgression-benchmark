@@ -82,3 +82,11 @@ def test_overlap_predictions_rejected():
     truth = pd.DataFrame(columns=["haplotype", "start", "end"])
     with pytest.raises(ValueError, match="Overlapping"):
         score_grid(predictions, truth, ["h0"], 100, 50, [(0, 100)])
+
+
+def test_fully_masked_region_has_no_metric_weight():
+    predictions = pd.DataFrame(columns=PREDICTION_COLUMNS)
+    truth = pd.DataFrame(columns=["haplotype", "start", "end"])
+    grid = score_grid(predictions, truth, ["h0"], 100, 50, [])
+    assert metrics(grid)["evaluated_windows"] == 0
+    assert metrics(grid)["false_positive_callable_fraction"] is None

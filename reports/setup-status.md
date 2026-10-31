@@ -1,76 +1,54 @@
 # Setup and verification status
 
+The isolated project repository is published publicly at
+[tyy-d/ghost-introgression-benchmark](https://github.com/tyy-d/ghost-introgression-benchmark).
+The initial remote commit was verified against local HEAD; the final push includes
+the tested pipeline and compact synthetic results.
+
 ## Completed
 
-- Created an isolated repository under the BIO course directory; verified that its
-  Git root is the project directory, not the enclosing home-directory repository.
-- Implemented simulation and migration-based truth extraction, upstream ArchIE
-  feature adapters and R GLM training, a SINGER/TRACE runner, callable-weighted
-  evaluation, threshold calibration, reporting, and bounded empirical preparation.
-- Added fixed smoke and replicated-study configurations, a project-local Conda
-  installer, HPC entry point, source commit identifiers, and public-publish script.
-- Ran available unit checks with the existing scientific Python environment:
-  **11 passed, 2 skipped**. The two skipped checks require `msprime` and cover
-  simulation/VCF sample ordering and exact ancestry-label extraction.
-- Compiled Python sources for syntax checking and validated shell-script syntax.
-- Built upstream SINGER's C++ source into a native Apple Silicon executable and
-  completed its official wrapper on a deterministic toy VCF, obtaining two
-  posterior samples in approximately 1.34 seconds. The wrapper used one of its
-  built-in recovery attempts after the native program initially crashed. This
-  component-only check is separate from the required two-method simulation run.
+- Installed project-local Python dependencies and R, compiled native Apple Silicon
+  SINGER, and installed upstream TRACE with its compiled extension.
+- Trained ArchIE on 2,000 independent 50-kb windows: 39,401 eligible haplotype
+  examples, including 707 positives. One-time training took approximately 82 s.
+- Completed both actual methods on the same seed-42, 1-Mb simulated sequences:
+  10 diploid target and 10 diploid reference samples, with the donor unsampled.
+- Retained four SINGER posterior ARGs after discarding four initial samples,
+  then ran upstream TRACE. This functional run is deliberately short and does
+  not establish MCMC convergence. The verified run required no native retries.
+- Ran the separately labeled true-ARG TRACE diagnostic and exported metrics,
+  precision-recall curves, callable-weighted grids, timings, tool provenance,
+  and a visually checked figure to [the saved report](smoke/report.md).
+- All 15 tests pass without skips. Ruff and shell syntax checks pass.
+- Both actual methods classified the 392 unambiguous grid cells correctly;
+  eight mixed-ancestry cells were reported separately. There were only eight
+  positive cells, so perfect single-seed scores are not general accuracy estimates.
 
-## Not completed or verified
+## Remaining research work
 
-- **No successful ArchIE + SINGER + TRACE smoke run.** Required dependencies could
-  not be installed, so method execution, training, exact simulated truth extraction,
-  SINGER conversion, and end-to-end figures remain unverified.
-- No replicated benchmark, empirical ancestry calls, empirical overlap, or scientific
-  accuracy claims. The generated report command will create figures only after a
-  successful actual run; there are no fabricated results or mock fallback methods.
-- Empirical preparation still requires release-specific QC/relatedness evidence;
-  inference also requires species-specific parameters, ancestral polarization, a
-  correctly sized trained model, and validation-frozen thresholds.
+The six-scenario replicated study and the mosquito empirical pilot have not been
+run. The benchmark configuration preserves longer MCMC settings for university HPC.
+The empirical pipeline requires documented QC/relatedness evidence, ancestral
+allele orientation, species-specific parameters, and validation-frozen thresholds.
+It rejects missing prerequisites and models trained at incompatible sample counts.
+Empirical overlap is agreement, not an accuracy measurement.
 
-## Environment blockers
+## Environment notes
 
-The sandbox cannot resolve external package hosts. Network-enabled Python and R
-installation commands were submitted, including a narrower wheels-only download.
-Automatic approval review timed out before those installers ran, including after
-the user explicitly approved project-local installation. These were review-service
-timeouts, not findings that the dependencies were unsafe.
+Early network approval attempts timed out, but subsequent installation and GitHub
+publication succeeded. The earlier network-disabled GitHub attempt is retained in
+`github-push-attempt.txt` as diagnostic history; it is not the current status.
 
-An upstream ArchIE checkout and TRACE checkout were downloaded successfully.
-SINGER was retrieved with a source-only sparse checkout and built locally. All
-downloads live in ignored directories, not in committed project code.
-
-The existing base Python's pytest debugging plugin segfaulted while importing
-`readline`. The available unit checks succeeded with:
+The inherited Conda Python readline module crashes under this sandbox when pytest
+loads interactive debugging/capture support. The complete passing test command was:
 
 ```bash
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHONPATH=src /opt/anaconda3/bin/python \
-  -m pytest -p no:debugging -q
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 MPLCONFIGDIR=.cache/matplotlib .venv/bin/python \
+  -m pytest -p no:debugging -p no:capture -q
 ```
 
-This is an environment workaround, not evidence that the new isolated environment
-has been installed or tested. Ruff is declared but has not been run locally.
-
-## Reproduce the remaining setup
-
-```bash
-bash scripts/bootstrap.sh
-conda activate "$PWD/.tools/environment"
-pytest -q
-ruff check src tests
-ghostbench smoke --config configs/smoke.yaml --output results/smoke
-```
-
-After a successful real run, copy its compact report, metrics, figure and provenance
-into a tracked report directory; keep bulk intermediate files ignored.
-
-## GitHub
-
-The intended remote is public `tyy-d/ghost-introgression-benchmark`. The GitHub CLI
-recognizes account `tyy-d`, but its authentication check reports an invalid token.
-Publication status and exact attempt output are retained in `github-push-attempt.txt`.
-Repair authentication with `gh auth login --hostname github.com`, then run
-`bash scripts/publish.sh` and verify the printed remote commit identifier.
+The verified local environment uses `.venv/` and `.tools/r/`. A clean installation
+can instead use `scripts/bootstrap.sh` and the project-local Conda environment.
+Python package versions are in `requirements.lock.txt`; R session details and
+upstream source commits are saved with the reports/configuration. Bulk genomes,
+ARGs, environments and models remain ignored.

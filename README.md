@@ -4,8 +4,10 @@ Compare **ArchIE** and **SINGER + TRACE** for introgression from an unsampled do
 using simulations with known ancestry and a bounded *Anopheles* empirical pilot.
 This is a computational biology class project with a 2–3-week research scope.
 
-**Status:** code and unit checks exist, but no successful full method run is claimed.
-See [setup status](reports/setup-status.md) for verified work and outstanding blockers.
+**Status:** both real methods completed the seed-42, 1-Mb synthetic run, including
+SINGER-inferred ARGs. See the [saved report](reports/smoke/report.md) and
+[setup status](reports/setup-status.md). Replicated research and the empirical pilot
+are subsequent stages; this single run is a functionality demonstration.
 
 ## Research question
 
@@ -32,10 +34,16 @@ pytest -q
 ruff check src tests
 ```
 
-The environment uses Python 3.11 and R; no human demographic parameters are used
+The environment uses Python 3.13 and R; no human demographic parameters are used
 as mosquito estimates. `RSCRIPT` and `SINGER_BINARY` can override executable paths.
 The downloaded upstream methods retain their original authorship and terms.
 Compatibility adaptations are listed in [methods notes](reports/methods.md).
+
+This checkout also has a verified local installation in `.venv/` with R in
+`.tools/r/`; use `.venv/bin/ghostbench` directly from the project root. The passing
+test invocation for the inherited Python/readline sandbox issue is recorded in
+[setup status](reports/setup-status.md). `requirements.lock.txt` records resolved
+Python versions; the source commit lock identifies the upstream methods.
 
 ## Run stages
 
@@ -60,6 +68,9 @@ reference samples, 1 Mb, seed 42, and 2,000 independent training windows. The
 inference command does not access the truth directory; only evaluation and the
 explicit true-ARG diagnostic do. Training, validation, and test seeds are separate.
 The single smoke run uses a fixed 0.5 probability cutoff; it does not tune on test labels.
+
+The saved run used `--output results/smoke-verified`. Export compact artifacts with
+`.venv/bin/python scripts/export_smoke.py --input results/smoke-verified --output reports/smoke`.
 
 For the replicated study, run inside a university allocation:
 

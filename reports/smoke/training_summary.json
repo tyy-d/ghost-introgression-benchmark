@@ -1,0 +1,12 @@
+{
+  "windows": 2000,
+  "labeled_haplotypes": 39401,
+  "positive_haplotypes": 707,
+  "seed": 100000,
+  "features": 48,
+  "glm_seconds": 6.77603279100731,
+  "total_seconds": 81.99866229202598,
+  "target_haplotypes": 20,
+  "reference_haplotypes": 20,
+  "window_size": 50000
+}

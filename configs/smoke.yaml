@@ -17,8 +17,8 @@ training_seed: 100000
 validation_seed: 200000
 trace_time: 100000
 trace_min_length: 0
-singer_samples: 20
-singer_burnin: 20
-singer_thin: 10
+singer_samples: 4
+singer_burnin: 4
+singer_thin: 1
 replicates: 1
 # Software validation parameters, not biological estimates for Anopheles.
