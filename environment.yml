@@ -8,4 +8,4 @@ dependencies:
   - cxx-compiler
   - bcftools
   - pip:
-      - -e .[dev,empirical]
+      - -e .[dev,explorer]

@@ -1,5 +1,33 @@
 # Setup and verification status
 
+## November 1 development update
+
+The November MVP now provides exact callable-base scoring, a read-only Streamlit
+explorer, static scientific exports, an approval proposal, and a course-format
+draft. All 35 tests pass; the earlier 15-test record below is historical.
+The corrected deadlines are November 14 for written approval and a presentable
+version, December 7 for our readiness target, and December 8 in the assignment.
+
+A fresh actual-method diagnostic includes mixed-ancestry bases and exposes errors
+hidden by the historical unambiguous-window scores. It remains a single-seed,
+unfrozen-threshold functionality test, not evidence of calibrated accuracy. The
+latest rerun required one recorded SINGER recovery attempt; native recovery can
+change the posterior, and short-chain outputs are not treated as stable accuracy estimates.
+
+The two-chain convergence pilot was manually interrupted after 1,405 elapsed
+seconds. A sandbox-denied redundant cleanup signal caused its saved failure status;
+a process-table audit confirmed no inference processes remained. The runner now
+preserves interruption/timeout status and records cleanup errors separately.
+Calibration, replicated research experiments, and empirical inference are pending.
+The failed pilot is retained with its original source fingerprint. Before retrying,
+archive `results/research-v2/pilot/` outside that path, then use the same study root
+so its elapsed budget remains charged. Do not overwrite the old pilot record.
+
+The final report draft is provisional. Its empirical gate remains unresolved,
+including metadata retrieval HTTP 403, QC/relatedness, polarization, and parameters.
+
+## Historical initial setup
+
 The isolated project repository is published publicly at
 [tyy-d/ghost-introgression-benchmark](https://github.com/tyy-d/ghost-introgression-benchmark).
 The initial remote commit was verified against local HEAD; the final push includes

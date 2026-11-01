@@ -1,160 +1,184 @@
 # Ghost Introgression Benchmark
 
-Compare **ArchIE** and **SINGER + TRACE** for introgression from an unsampled donor,
-using simulations with known ancestry and a bounded *Anopheles* empirical pilot.
-This is a computational biology class project with a 2–3-week research scope.
+A reproducible comparison of **ArchIE** and **SINGER + TRACE** for ancestry from an
+unsampled donor. The project separates research evidence, diagnostic runs, and
+interactive threshold previews.
 
-**Status:** both real methods completed the seed-42, 1-Mb synthetic run, including
-SINGER-inferred ARGs. See the [saved report](reports/smoke/report.md) and
-[setup status](reports/setup-status.md). Replicated research and the empirical pilot
-are subsequent stages; this single run is a functionality demonstration.
+**Milestones:** minimal presentable version and written professor/TA approval by
+**November 14**; final readiness targeted for **December 7**. The assignment states
+**December 8** as the submission deadline. See [course requirements](reports/course-requirements.md).
 
-## Research question
+## Current deliverables
 
-How do detection accuracy, false positives, and computational cost change with
-introgression age and amount when the donor is unsampled? A secondary question is
-how much TRACE's performance depends on reconstructing the ARG.
+- [Approval proposal](reports/approval-proposal.md), ready for student review and submission.
+- [November MVP report](reports/nov14-mvp/research-report-draft.pdf), with five text
+  pages plus figures, 12-point type and 1.5 spacing. It is a draft, not an approval record.
+- A read-only explorer with performance, ancestry-track and run-quality views.
+- A portable processed-results demonstration in `reports/nov14-mvp/explorer-results/`.
+- Exact callable-base scoring, validation-only FDR calibration, paired replicate
+  bootstrapping, convergence screening, integrity checks, and bounded job execution.
 
-The comparison is **TRACE versus ArchIE**, not a reproduction of the 2020 paper's
-separate conditional site-frequency-spectrum demographic inference. Simulations
-provide accuracy measurements. Empirical concordance provides biological context,
-not truth labels or evidence sufficient to name an extinct donor.
+The original [smoke report](reports/smoke/report.md) is preserved as historical
+functionality evidence. Its perfect window-level scores excluded mixed regions.
+**They are not the current primary evaluation.** The new diagnostic run includes
+all callable bases and reveals errors at the unfrozen 0.5 threshold. Neither that
+single seed nor an explorer threshold preview establishes comparative accuracy.
 
-## Set up
+## Open the explorer
 
-Requirements: Conda, Git, a C++17 compiler, and network access. The bootstrap script
-installs only within this project, apart from normal system-provided tools. It
-downloads upstream repositories into ignored `vendor/` directories, checks out
-recorded commits, installs R and Python dependencies, and builds SINGER.
+From this project directory, using the already installed local environment:
+
+```bash
+export MPLCONFIGDIR="$PWD/.cache/matplotlib"
+.venv/bin/ghostbench view --output results/research-v2
+```
+
+Open the printed localhost URL. For a fresh checkout without raw experiment output,
+use the portable demonstration instead:
+
+```bash
+.venv/bin/ghostbench view --output reports/nov14-mvp/explorer-results
+```
+
+The explorer never launches jobs or modifies frozen thresholds. It filters saved
+results, validates hashes, links genomic x-axes, and exports PNG/SVG/PDF plus TSV and
+selection metadata. Start/End controls define the export range; transient mouse
+zoom is not saved. Threshold previews are labeled **EXPLORATORY PREVIEW** and are
+excluded from research summaries. Validation results are not displayed as test evidence.
+
+## Install a clean environment
+
+Requires Git, Conda, and a C++17 compiler:
 
 ```bash
 bash scripts/bootstrap.sh
 conda activate "$PWD/.tools/environment"
-pytest -q
-ruff check src tests
 ```
 
-The environment uses Python 3.13 and R; no human demographic parameters are used
-as mosquito estimates. `RSCRIPT` and `SINGER_BINARY` can override executable paths.
-The downloaded upstream methods retain their original authorship and terms.
-Compatibility adaptations are listed in [methods notes](reports/methods.md).
+The bootstrap pins upstream source commits and installs Python, R and explorer
+requirements inside the project. Empirical libraries are optional:
+`pip install -e '.[empirical]'`. The current verified checkout instead uses `.venv/`
+and `.tools/r/`; executable discovery supports both arrangements. `SINGER_BINARY`
+points to the official Python wrapper `singer_master`, not the C++ core executable.
+`RSCRIPT` can override R discovery. Package versions and upstream commits are recorded.
 
-This checkout also has a verified local installation in `.venv/` with R in
-`.tools/r/`; use `.venv/bin/ghostbench` directly from the project root. The passing
-test invocation for the inherited Python/readline sandbox issue is recorded in
-[setup status](reports/setup-status.md). `requirements.lock.txt` records resolved
-Python versions; the source commit lock identifies the upstream methods.
-
-## Run stages
-
-Run from the repository root after activating the environment:
+The inherited Python/readline sandbox requires this test invocation:
 
 ```bash
-ghostbench simulate --config configs/smoke.yaml --output results/smoke
-ghostbench train --config configs/smoke.yaml --output work/archie
-ghostbench run --config configs/smoke.yaml --output results/smoke --model work/archie/model.rds
-ghostbench evaluate --output results/smoke
-ghostbench report --output results/smoke
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 MPLCONFIGDIR=.cache/matplotlib .venv/bin/python \
+  -m pytest -p no:debugging -p no:capture -q
+.venv/bin/ruff check src tests scripts
 ```
 
-Or run `ghostbench smoke --config configs/smoke.yaml --output results/smoke` to train
-the model if necessary and execute all synthetic stages. That command runs actual
-ArchIE feature extraction and an R binomial GLM, actual SINGER inference, and the
-upstream TRACE HMM. It also runs TRACE on true ARGs as a separately named diagnostic.
-There is no mock-method fallback.
-
-The software-validation smoke configuration uses 10 diploid target and 10 diploid
-reference samples, 1 Mb, seed 42, and 2,000 independent training windows. The
-inference command does not access the truth directory; only evaluation and the
-explicit true-ARG diagnostic do. Training, validation, and test seeds are separate.
-The single smoke run uses a fixed 0.5 probability cutoff; it does not tune on test labels.
-
-The saved run used `--output results/smoke-verified`. Export compact artifacts with
-`.venv/bin/python scripts/export_smoke.py --input results/smoke-verified --output reports/smoke`.
-
-For the replicated study, run inside a university allocation:
+## Execute the research protocol
 
 ```bash
-bash scripts/run_hpc.sh
+# Always use a new directory for a genuinely changed scientific configuration.
+.venv/bin/ghostbench pilot --config configs/research.yaml --output results/research-v2
+.venv/bin/ghostbench calibrate --config configs/research.yaml --output results/research-v2
+.venv/bin/ghostbench benchmark --config configs/research.yaml --output results/research-v2 --stage core
+.venv/bin/ghostbench summarize --output results/research-v2
+.venv/bin/ghostbench export --output results/research-v2 --destination reports/research-v2
+.venv/bin/ghostbench paper --output results/research-v2 --destination reports/nov14-mvp
 ```
 
-This calibrates thresholds on a held-out 10-Mb validation sequence, then freezes
-them for all six scenarios and ten replicates per scenario. The runner resumes
-completed replicates. Local training and full evaluation can be computationally
-substantial; the short smoke MCMC chain is not suitable for claims of convergence.
-The runner uses normal sequential processes and a small process pool for training;
-it does not assume your university's scheduler, account, or partition.
+The first long pilot was interrupted and remains unscreened; calibration and the
+replicated study have not run. Before retrying this local campaign, archive the
+existing `results/research-v2/pilot/` directory under a dated history directory,
+then rerun the pilot with the same study root and budget ledger. Its source
+fingerprint is preserved and must not be rewritten. See [execution status](reports/setup-status.md).
 
-## Inputs and outputs
+The pilot must finish with screened settings before calibration or research
+inference proceeds. Unresolved convergence is reported rather than silently ignored.
+The pilot runs two independent chains for baseline and null datasets, trying
+50/50, 100/100 and 200/200 retained/burn-in samples, thinning five. Screening uses
+classical split R-hat <=1.05 and ESS >=50 for scalar statistics; constants alone
+cannot prove mixing, and a passing pilot does not prove convergence in every test run.
 
-- `inputs/`: phased biallelic VCF, explicit sample/haplotype order, callable intervals.
-- `truth/`: simulation ARG and true donor intervals; never a method input.
-- `archie/`, `trace/`, `trace_true_arg/`: predictions, scores, and fit logs.
-- Experiment root: configuration, tool versions and commits, runtime, metrics,
-  precision–recall figure, and generated Markdown report.
+Calibration uses **six independent 1-Mb baseline regions**. Each method maximizes
+validation recall subject to estimated base-level FDR <=5%, preferring stricter
+thresholds on ties. A method with no qualifying nonempty call set abstains. Thresholds
+are frozen before testing. Report achieved test FDR; a validation target is not a
+guarantee under changed histories or ancestry prevalence.
 
-Predictions are tab-separated with columns `replicate`, `method`, `haplotype`,
-`chromosome`, `start`, `end`, `probability`. Coordinates are **zero-based half-open**;
-VCF positions are one-based. Missing calls mean probability zero; overlapping calls
-are rejected. Metrics use a common 50-kb grid weighted by callable bases. True
-ancestry fractions below 0.3 or above 0.7 define negative/positive windows; mixed
-windows are counted separately. Undefined precision or recall is reported as null.
-
-## Empirical pilot
-
-The data target is Ag1000G phase 3, 20 unrelated quality-filtered *A. gambiae* and
-20 *A. coluzzii* from Burkina Faso, chromosome 3L, internal coordinates
-`[10,000,000, 12,000,000)`. Downloading is limited to the configured sample sets and
-region. Local coordinates are recorded with a reversible genomic offset.
+Core scheduling interleaves conditions and initially targets five replicates per
+condition. Only after that stage and within the remaining budget:
 
 ```bash
-ghostbench empirical-prepare --config configs/empirical.yaml --output results/empirical
-ghostbench empirical-run --config configs/empirical.yaml --output results/empirical --model work/empirical-archie/model.rds
+.venv/bin/ghostbench benchmark --output results/research-v2 --stage expansion
+.venv/bin/ghostbench benchmark --output results/research-v2 --stage stress
 ```
 
-Before preparation, provide `qc_metadata` in the configuration if the API metadata
-does not already include documented `qc_pass` and `unrelated_keep` boolean columns.
-This TSV must identify samples by `sample_id`; retain the QC and relatedness source
-and selection rule in the report. Sample selection is sorted and deterministic;
-unknown QC or relatedness does not silently pass.
+Expansion adds replicates 5-9; stress tests add five replicates each of reference
+admixture and demographic mismatch. The ArchIE model remains fixed. Study execution
+allows at most four workers, one numerical-library thread per worker, and twelve
+elapsed batch hours. The pilot is included in that budget and separately capped
+at two hours. No new work is scheduled when the remaining budget is below the
+estimated job duration. Keep a single study directory for the campaign so elapsed
+budgets carry across batches. Changing directories must not be used to evade the budget.
 
-Before inference, document mutation rate, recombination rate, effective size,
-TRACE timescale, and sources in the empirical configuration. Supply an ancestrally
-polarized VCF and set `ancestral_polarization_verified: true` with the supporting
-source. The downloaded VCF is reference-oriented and **does not establish ancestral
-state**. Retrain ArchIE for 40 target and 40 reference haplotypes using appropriate
-simulations. Provide `frozen_thresholds: {archie: ..., trace: ...}` from validation.
-These scientific prerequisites are explicit and currently unresolved.
+## Evaluation and interpretation
 
-Repeat preparation/inference with `reference_offset: 20` in a copied configuration
-and a new output directory for comparison-population sensitivity. If too few samples
-pass, the command fails rather than silently reusing related or lower-quality samples.
+Primary metrics use exact intersections of called and true ancestry at each
+method's native resolution over **all callable bases**, including mixed regions.
+TP, FP, FN and TN are base counts. Common 50-kb scores remain secondary diagnostics.
+Undefined FDR/precision means no called bases, not perfect FDR control. The pure-null
+condition is summarized by false-called callable fraction and false-called kb/Mb.
+The structure scenario includes ancestral migration: report its call rate, not an
+ordinary false-positive rate against a biologically unadmixed truth.
 
-## Organization and publishing
+Confidence intervals resample independent simulation replicates with 2,000 bootstrap
+draws and seed 20261101. Paired differences use the same replicate IDs for both
+methods. With fewer than five usable pairs, results remain descriptive without
+confidence intervals. Unscheduled, failed, interrupted, corrupted and diagnostic-only
+runs remain visible. The displayed illustrative research cases are selected by the
+largest FP/FN region with deterministic tie-breaking, not by visual appeal.
 
-Core code lives in `src/ghostbench/`; `configs/` describes experiments; `scripts/`
-contains setup and HPC entry points; `tests/` verifies scientific bookkeeping;
-`notebooks/` is for consuming saved outputs; `reports/` holds reviewed summaries.
-Raw genomes, local settings, binaries, environments, and bulk results are ignored.
+## Run integrity and data layout
 
-The intended public repository is `tyy-d/ghost-introgression-benchmark`.
-After committing verified code and compact results, `bash scripts/publish.sh`
-creates and pushes the repository and checks that remote `main` matches local HEAD.
-No command stages files from the enclosing home-directory repository.
+Each managed run stores a manifest and fresh numbered attempt directories. Its
+identity covers configuration, RNG seeds, input/model/source/software hashes and
+thresholds. Only matching, completed, hash-validated results are cached. Changed
+configurations and altered/missing output are rejected. Incomplete attempts are
+not reused as successful results. Missing method files are never scored as zero ancestry.
+
+- `inputs/`: phased biallelic VCF, ordered sample metadata, callable intervals.
+- `truth/`: exact migration-based ancestry and true ARGs, separate from detector inputs.
+- Method directories: predictions, exact scoring segments, PR curves and secondary grids.
+- Run metadata: configuration, versions, wall/CPU time and memory availability notes.
+
+Prediction TSV columns are `replicate`, `method`, `haplotype`, `chromosome`, `start`,
+`end`, `probability`; intervals are **zero-based half-open**, unlike one-based VCF
+positions. Genome length and generation-based times are explicitly labeled.
+
+The explorer bundle contains processed intervals only, with a distinct fingerprint.
+It cannot be resumed as an inference run. Raw genomes, ARGs, models, environments,
+local settings and bulk results remain ignored. The historical smoke report is not overwritten.
+
+## Empirical readiness and course submission
+
+```bash
+.venv/bin/ghostbench readiness --config configs/empirical.yaml --output results/empirical-readiness
+```
+
+The bounded metadata check encountered HTTP 403 responses from the documented GCS
+URLs. This is an access result, not evidence that the public dataset does not exist.
+Empirical inference remains gated on QC/relatedness evidence, ancestral polarization,
+species parameters, a correctly sized ArchIE model, and validation-frozen thresholds.
+Do not treat reference alleles as ancestral or the controlled software parameters
+as fitted mosquito biology. Optional biological observations would be exploratory.
+
+The final paper should follow the course's approximate two-page introduction,
+2-3 results pages excluding figures, and 1-2 discussion pages, plus annotated
+executed code. The student must obtain written approval by November 14. This
+software does not send messages to instructors or claim approval was obtained.
 
 ## Sources
 
-- [Zhang et al., TRACE](https://doi.org/10.1126/science.aef8874)
-- [Durvasula and Sankararaman, ghost introgression in Africans](https://doi.org/10.1126/sciadv.aax5097)
-- [ArchIE software](https://github.com/sriramlab/ArchIE)
-- [TRACE software](https://github.com/YulinZhang9806/trace)
-- [SINGER software and parameter guidance](https://github.com/popgenmethods/SINGER)
-- [Ag1000G phased data](https://www.malariagen.net/data_package/ag1000g-phase3-hap/)
-
-## Limits
-
-No whole-genome scan, no new extinct-species identification, and no inference of
-accuracy from overlap alone. Ancestral structure is a model stress test, not a
-biologically equivalent no-admixture null. Species-specific model calibration,
-ancestral polarization, accessibility, reference admixture, and MCMC convergence
-are essential parts of interpreting the empirical results.
+- [Durvasula and Sankararaman, 2020](https://doi.org/10.1126/sciadv.aax5097)
+- [Zhang et al., TRACE, 2026](https://doi.org/10.1126/science.aef8874)
+- [ArchIE source](https://github.com/sriramlab/ArchIE)
+- [TRACE source](https://github.com/YulinZhang9806/trace)
+- [SINGER source and convergence guidance](https://github.com/popgenmethods/SINGER)
+- [Ag1000G public phased data](https://www.malariagen.net/data_package/ag1000g-phase3-hap/)
+- [Anopheles mutation-rate study](https://pmc.ncbi.nlm.nih.gov/articles/PMC8742016/)

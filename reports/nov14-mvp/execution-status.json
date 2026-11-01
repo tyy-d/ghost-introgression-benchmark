@@ -1,0 +1,15 @@
+{
+  "pilot": {
+    "fingerprint": "ab093c57b8b4c98294c8f23f220117ddc270ee7f419df3a3fa5dc756ebc583e2",
+    "status": "failed",
+    "finished": true,
+    "attempts": [],
+    "statistic_definition": "50-kb diversity MSE, unmapped sites, actual TRACE ancestry fraction for h0",
+    "error": "PermissionError: [Errno 1] Operation not permitted",
+    "elapsed_seconds": 1404.9327954580076
+  },
+  "audit": "Pilot was manually interrupted after 1405 elapsed seconds. Sandbox denied a redundant cleanup signal, masking cancellation as failure. A subsequent process-table audit verified no SINGER or inference processes remained. Cleanup telemetry now preserves the primary interruption/timeout and separately records signal failures. Formal convergence remains unresolved.",
+  "calibration": "not run",
+  "core": "not run",
+  "empirical": "not run; metadata HTTP 403 and biological prerequisites unresolved"
+}

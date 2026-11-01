@@ -1,0 +1,8 @@
+{
+  "retained_samples": 4,
+  "burnin_samples": 4,
+  "thinning": 1,
+  "seed": 42,
+  "recovery_attempts": 1,
+  "convergence": "unresolved"
+}

@@ -1,0 +1,12 @@
+{
+  "archie_training_seconds_one_time": 81.99866229202598,
+  "archie_inference_seconds": 4.1759570417925715,
+  "singer_seconds": 44.62565179169178,
+  "trace_hmm_seconds": 23.36417529080063,
+  "trace_end_to_end_seconds": 67.98982708249241,
+  "trace_true_arg_seconds": 4.943878165911883,
+  "worker_cpu_seconds": 32.191607,
+  "children_cpu_seconds": 43.116986000000004,
+  "worker_peak_rss_bytes": 269254656,
+  "largest_child_peak_rss_bytes": 678920192
+}

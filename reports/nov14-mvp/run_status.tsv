@@ -1,0 +1,2 @@
+run_id	path	status	role	scenario	replicate	error	fingerprint	eligible_test	artifact_dir
+diagnostic/smoke-42-fixed	/Users/thomasyi/Desktop/Cornell/jun/BIO/ghost-introgression-benchmark/results/research-v2/diagnostic/smoke-42-fixed	diagnostic-only	diagnostic	baseline	0		5640f011bc542cc10341c2aa921e84b761e1726b5494b9a8c8acb3db06cdcd00	False	results/research-v2/diagnostic/smoke-42-fixed/attempts/0001

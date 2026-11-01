@@ -99,3 +99,114 @@ def select_threshold(grid):
     if valid.empty:
         return 0.5
     return float(valid.sort_values(["f1", "threshold"], ascending=False).iloc[0].threshold)
+
+
+SEGMENT_COLUMNS = ["haplotype", "chromosome", "start", "end", "bases", "truth", "probability"]
+
+
+def base_segments(predictions, truth, haplotypes, callable_frame, require_dense=False):
+    """Partition callable sequence at every truth/prediction boundary, without rounding.
+
+    Missing *files* are rejected by the result loader. An explicitly empty call
+    table can be scored as no calls; dense detector output must cover every
+    callable base when require_dense=True. No mixed-ancestry region is discarded.
+    """
+    predictions = predictions.copy()
+    truth = truth.copy()
+    callable_frame = callable_frame.copy()
+    for frame in [predictions, truth, callable_frame]:
+        if "chromosome" not in frame:
+            frame["chromosome"] = "1"
+        frame["chromosome"] = frame.chromosome.astype(str)
+        if len(frame) and (not np.isfinite(frame[["start", "end"]].to_numpy()).all()
+                           or (frame.start < 0).any() or (frame.end <= frame.start).any()):
+            raise ValueError("Invalid genomic intervals")
+    if len(predictions) and (not predictions.probability.between(0, 1).all()
+                             or not set(predictions.haplotype).issubset(set(haplotypes))):
+        raise ValueError("Invalid probabilities or unknown haplotypes")
+    rows = []
+    for chromosome, mask in callable_frame.groupby("chromosome", sort=True):
+        masks = merged_intervals(list(zip(mask.start, mask.end)))
+        for haplotype in haplotypes:
+            calls = predictions[(predictions.haplotype == haplotype)
+                                & (predictions.chromosome == chromosome)].sort_values("start")
+            if len(calls) > 1 and (calls.start.to_numpy()[1:] < calls.end.to_numpy()[:-1]).any():
+                raise ValueError("Overlapping prediction intervals")
+            actual = truth[(truth.haplotype == haplotype) & (truth.chromosome == chromosome)]
+            positives = merged_intervals(list(zip(actual.start, actual.end)))
+            call_rows = list(calls.itertuples())
+            for left, right in masks:
+                cuts = {left, right}
+                for a, b in positives:
+                    if a < right and b > left:
+                        cuts.update([max(a, left), min(b, right)])
+                local_calls = [call for call in call_rows if call.start < right and call.end > left]
+                for call in local_calls:
+                    cuts.update([max(call.start, left), min(call.end, right)])
+                boundaries = sorted(cuts)
+                p_index = t_index = 0
+                for start, end in zip(boundaries[:-1], boundaries[1:], strict=True):
+                    while p_index < len(local_calls) and local_calls[p_index].end <= start:
+                        p_index += 1
+                    covered = p_index < len(local_calls) and local_calls[p_index].start <= start
+                    if require_dense and not covered:
+                        raise ValueError(f"Incomplete prediction coverage: {haplotype}:{chromosome}:{start}-{end}")
+                    probability = float(local_calls[p_index].probability) if covered else 0.0
+                    while t_index < len(positives) and positives[t_index][1] <= start:
+                        t_index += 1
+                    is_true = t_index < len(positives) and positives[t_index][0] <= start
+                    rows.append([haplotype, chromosome, start, end, end-start, is_true, probability])
+    return pd.DataFrame(rows, columns=SEGMENT_COLUMNS)
+
+
+def base_metrics(segments, threshold=0.5):
+    weights = segments.bases.to_numpy(dtype=float)
+    actual = segments.truth.to_numpy(dtype=bool)
+    called = (segments.probability.to_numpy(dtype=float) >= threshold
+              if threshold is not None else np.zeros(len(segments), dtype=bool))
+    tp = float(weights[called & actual].sum())
+    fp = float(weights[called & ~actual].sum())
+    fn = float(weights[~called & actual].sum())
+    tn = float(weights[~called & ~actual].sum())
+    total = tp + fp + fn + tn
+
+    def ratio(a, b):
+        return a / b if b else None
+
+    return {"threshold": threshold, "tp_bases": tp, "fp_bases": fp, "fn_bases": fn,
+            "tn_bases": tn, "callable_bases": total, "true_bases": tp + fn,
+            "called_bases": tp + fp, "precision": ratio(tp, tp+fp),
+            "recall": ratio(tp, tp+fn), "fdr": ratio(fp, tp+fp),
+            "f1": ratio(2*tp, 2*tp+fp+fn),
+            "false_called_fraction": ratio(fp, total), "false_called_kb_per_mb": ratio(fp*1000, total),
+            "call_rate": ratio(tp+fp, total), "operating_point": "abstain" if threshold is None else "frozen"}
+
+
+def base_curve(segments):
+    """Exact weighted PR curve in O(n log n), pooling all validation replicates."""
+    if segments.empty:
+        return pd.DataFrame(columns=["threshold", "tp_bases", "fp_bases", "called_bases", "precision", "recall", "fdr"])
+    frame = segments.assign(
+        tp=segments.bases * segments.truth.astype(int),
+        fp=segments.bases * (~segments.truth.astype(bool)).astype(int),
+    ).groupby("probability", sort=True)[["tp", "fp"]].sum().sort_index(ascending=False).cumsum()
+    frame = frame.rename(columns={"tp": "tp_bases", "fp": "fp_bases"})
+    frame["called_bases"] = frame.tp_bases + frame.fp_bases
+    frame["precision"] = frame.tp_bases / frame.called_bases
+    frame["fdr"] = frame.fp_bases / frame.called_bases
+    total_true = float(segments.loc[segments.truth.astype(bool), "bases"].sum())
+    frame["recall"] = frame.tp_bases / total_true if total_true else np.nan
+    return frame.reset_index(names="threshold")
+
+
+def fdr_threshold(segments, target=0.05):
+    if not 0 < target < 1:
+        raise ValueError("FDR target must be between zero and one")
+    curve = base_curve(segments)
+    eligible = curve[(curve.called_bases > 0) & (curve.fdr <= target)].dropna(subset=["recall"])
+    if eligible.empty:
+        return {"threshold": None, "status": "no qualifying operating point", "target_fdr": target}
+    best = eligible.sort_values(["recall", "threshold"], ascending=False).iloc[0]
+    return {"threshold": float(best.threshold), "status": "qualified", "target_fdr": target,
+            "validation_recall": float(best.recall), "validation_fdr": float(best.fdr),
+            "validation_called_bases": float(best.called_bases)}

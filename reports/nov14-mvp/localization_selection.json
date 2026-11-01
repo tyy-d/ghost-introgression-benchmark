@@ -1,0 +1,18 @@
+{
+  "run_id": "/Users/thomasyi/Desktop/Cornell/jun/BIO/ghost-introgression-benchmark/results/research-v2/diagnostic/smoke-42-fixed",
+  "fingerprint": "5640f011bc542cc10341c2aa921e84b761e1726b5494b9a8c8acb3db06cdcd00",
+  "haplotype": "h0",
+  "chromosome": "1",
+  "start": 0,
+  "end": 1000000,
+  "units": "zero-based half-open bp",
+  "threshold_status": "diagnostic-unfrozen",
+  "preview_threshold": null,
+  "stored_thresholds": {
+    "archie": 0.5,
+    "trace": 0.5,
+    "trace_true_arg": 0.5
+  },
+  "role": "diagnostic",
+  "scenario": "baseline"
+}

@@ -1,8 +1,10 @@
 """Shared configuration, coordinates, and result formats."""
 
 import json
+import os
+import signal
 import subprocess
-import time
+import tempfile
 from pathlib import Path
 
 import pandas as pd
@@ -22,25 +24,42 @@ def read_config(path):
 
 
 def write_json(path, value):
-    Path(path).parent.mkdir(parents=True, exist_ok=True)
-    Path(path).write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, delete=False) as stream:
+        stream.write(json.dumps(value, indent=2, allow_nan=False) + "\n")
+        temporary = stream.name
+    os.replace(temporary, path)
 
 
-def run_command(command, log, cwd=None):
+def run_command(command, log, cwd=None, timeout=None):
     """Execute a real tool and retain its complete output and wall time."""
     log = Path(log).resolve()
     log.parent.mkdir(parents=True, exist_ok=True)
-    start = time.monotonic()
-    with log.open("w") as stream:
-        process = subprocess.run(command, stdout=stream, stderr=subprocess.STDOUT, cwd=cwd)
-    elapsed = time.monotonic() - start
-    write_json(log.with_suffix(".command.json"), {
-        "command": [str(x) for x in command], "cwd": str(cwd) if cwd else None,
-        "seconds": elapsed, "returncode": process.returncode,
-    })
-    if process.returncode:
-        raise RuntimeError(f"Command failed ({process.returncode}); see {log}")
-    return elapsed
+    from .process import execute
+
+    seconds, returncode, telemetry = execute(command, log, cwd, timeout)
+    write_json(log.with_suffix(".command.json"), telemetry)
+    if returncode:
+        raise RuntimeError(f"Command failed ({returncode}); see {log}")
+    return seconds
+
+
+def terminate_group(process):
+    """Terminate the complete job, including native grandchildren."""
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        return
+    try:
+        process.wait(timeout=3)
+    except subprocess.TimeoutExpired:
+        pass
+    # The leader can exit before a grandchild: always kill remaining group members.
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
 
 
 def write_predictions(rows, path):

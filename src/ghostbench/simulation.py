@@ -12,13 +12,16 @@ from .io import vcf_position, write_json
 def simulate(config, seed, length=None, fraction=None):
     demography = msprime.Demography()
     for name in ["target", "reference", "donor", "modern", "ancestor"]:
-        demography.add_population(name=name, initial_size=config["effective_size"])
+        demography.add_population(name=name, initial_size=config.get("simulation_effective_size", config["effective_size"]))
     proportion = config["admixture_fraction"] if fraction is None else fraction
     if proportion:
         # Backwards in time, target lineages move into the unsampled donor.
         demography.add_mass_migration(
             time=config["admixture_time"], source="target", dest="donor", proportion=proportion
         )
+    if config.get("reference_admixture_fraction", 0):
+        demography.add_mass_migration(time=config["admixture_time"], source="reference", dest="donor",
+                                      proportion=config["reference_admixture_fraction"])
     if config.get("ancestral_structure"):
         # Bidirectional ancestral migration without a discrete pulse. This is
         # a structured-history stress test, not a biologically unadmixed null.

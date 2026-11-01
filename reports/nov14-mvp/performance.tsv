@@ -1,0 +1,19 @@
+scenario	method	metric	estimate	ci_low	ci_high	bootstrap_defined_draws	bootstrap_draws	replicates	qualification	interpretation	callable_bases	called_bases	true_bases
+baseline	archie	recall	0.7124441360082245			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	600000.0	658519.0
+baseline	archie	precision	0.78193			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	600000.0	658519.0
+baseline	archie	fdr	0.21807			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	600000.0	658519.0
+baseline	archie	false_called_fraction	0.0065421			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	600000.0	658519.0
+baseline	archie	false_called_kb_per_mb	6.5421			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	600000.0	658519.0
+baseline	archie	call_rate	0.03			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	600000.0	658519.0
+baseline	trace	recall	0.8966240913322167			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	1381000.0	658519.0
+baseline	trace	precision	0.42754815351194786			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	1381000.0	658519.0
+baseline	trace	fdr	0.5724518464880521			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	1381000.0	658519.0
+baseline	trace	false_called_fraction	0.0395278			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	1381000.0	658519.0
+baseline	trace	false_called_kb_per_mb	39.5278			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	1381000.0	658519.0
+baseline	trace	call_rate	0.06905			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	1381000.0	658519.0
+baseline	trace_true_arg	recall	0.9868158701571254			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	1941000.0	658519.0
+baseline	trace_true_arg	precision	0.33479495105615664			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	1941000.0	658519.0
+baseline	trace_true_arg	fdr	0.6652050489438434			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	1941000.0	658519.0
+baseline	trace_true_arg	false_called_fraction	0.06455815			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	1941000.0	658519.0
+baseline	trace_true_arg	false_called_kb_per_mb	64.55815			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	1941000.0	658519.0
+baseline	trace_true_arg	call_rate	0.09705			0	0	1	descriptive: fewer than five replicates	simulation accuracy	20000000.0	1941000.0	658519.0

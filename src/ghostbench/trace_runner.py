@@ -34,23 +34,29 @@ def infer_arg(vcf, config, output):
                "-polar", "0.99",
                "-start", "0", "-end", str(config["sequence_length"]),
                "-n", str(config["singer_samples"] + config["singer_burnin"]),
-               "-thin", str(config["singer_thin"]), "-seed", str(config["seed"])]
+               "-thin", str(config["singer_thin"]), "-seed", str(config.get("singer_seed", config["seed"]))]
     # SINGER owns <prefix>.log for recovery state. Capturing stdout there would
     # corrupt its checkpoints, especially when the official wrapper retries.
-    seconds = run_command(command, output / "singer.stdout.log")
+    seconds = run_command(command, output / "singer.stdout.log", timeout=config.get("job_timeout_seconds"))
     # Different SINGER releases expose tree conversion as a separate tool.
     converter = Path(singer_binary()).parent / "convert_to_tskit"
-    trees = sorted(output.glob("*.trees"))
-    if not trees and converter.exists():
+    # Fresh attempt directories prevent accidental reuse of an older posterior.
+    trees = []
+    if converter.exists():
         seconds += run_command([
             sys.executable, str(converter), "-input", str(prefix), "-output", str(prefix),
             "-start", str(config["singer_burnin"]),
             "-end", str(config["singer_samples"] + config["singer_burnin"]),
             "-step", "1",
-        ], output / "convert.log")
+        ], output / "convert.log", timeout=config.get("job_timeout_seconds"))
         trees = sorted(output.glob("*.trees"))
-    if not trees:
-        raise RuntimeError(f"SINGER produced no converted ARGs; inspect {output}")
+    if len(trees) != config["singer_samples"]:
+        raise RuntimeError(f"Expected {config['singer_samples']} retained ARGs, found {len(trees)} at {output}")
+    stdout = (output / "singer.stdout.log").read_text(errors="replace")
+    write_json(output / "quality.json", {"retained_samples": len(trees), "burnin_samples": config["singer_burnin"],
+                                         "thinning": config["singer_thin"], "seed": config.get("singer_seed", config["seed"]),
+                                         "recovery_attempts": stdout.count("Auto-debug iteration:"),
+                                         "convergence": config.get("convergence_status", "unresolved")})
     return trees, seconds
 
 
