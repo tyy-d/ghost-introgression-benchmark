@@ -26,13 +26,13 @@ Public Ag1000G genomes motivate a conditional nonhuman demonstration, but empiri
 
 Only diagnostic results are available. All numerical values below use an unfrozen 0.5 threshold and do not estimate held-out calibrated performance.
 
-The convergence pilot status is failed. Two independent chains are screened using split R-hat and effective sample size for diversity fit, incompatible mutation sites, and TRACE ancestry amount on a predeclared focal haplotype. Constant statistics alone cannot establish mixing. Passing this pilot supports a choice of settings; it is not proof of convergence in every test history.
+The convergence pilot did not complete: it was manually interrupted after about 23 minutes, and a PermissionError during cleanup caused the run to be recorded as failed. Therefore, convergence has not been assessed. The planned checks use two independent chains and examine split R-hat and effective sample size for diversity fit, incompatible mutation sites, and TRACE ancestry amount on a predeclared focal haplotype. Constant statistics alone cannot establish mixing. Passing this pilot would support a choice of settings; it would not prove convergence in every test history.
 
 The primary table pools exact callable-base counts. It must be read together with the per-condition tables and paired bootstrap results: pooling different conditions can conceal failure at low ancestry prevalence or old admixture. Undefined FDR or precision means there are no called bases, not perfect control of false discoveries. True-ARG TRACE is a diagnostic and is never a deployable empirical alternative.
 
 ## Results: comparisons, tests and resource cost
 
-The primary endpoint is recall at thresholds targeting estimated validation FDR no greater than five percent. Six independent one-megabase validation regions calibrate each method. If no nonempty call set qualifies, that method abstains at this operating target. The test result is achieved FDR alongside recall; a validation target cannot guarantee the same error rate under changed demographic histories.
+The primary endpoint is recall at thresholds targeting estimated validation FDR no greater than five percent. The planned calibration will use six independent one-megabase validation regions for each method. If no nonempty call set qualifies, that method will abstain at this operating target. The test result will be achieved FDR alongside recall; a validation target cannot guarantee the same error rate under changed demographic histories.
 
 Uncertainty resamples independent simulation replicates and preserves method pairing. Five or more usable paired replicates are required for confidence intervals; smaller sets remain descriptive. Failed, incomplete and corrupted outputs are counted in the run-status table rather than imputed as zero ancestry. An alternative-history scenario contains ancestral migration, so its calls are not interpreted as ordinary false positives.
 
