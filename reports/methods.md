@@ -42,11 +42,7 @@ scientific performance comparison. True ARGs are separately labeled diagnostics.
 
 ## Evaluation
 
-Project coordinates are zero-based half-open, VCF is one-based. Both predictions
-and truth are integrated over the same callable bases and 50-kb grid. Classify
-grid cells by their callable-weighted truth fraction; report ambiguous cells
-separately. Precision–recall uses probability thresholds, and the full benchmark
-freezes an F1-optimal validation threshold before test-scenario evaluation.
+Project coordinates are zero-based half-open; VCF positions are one-based. Primary metrics compare predictions with truth over exact callable bases at each method's native resolution. TP, FP, FN, and TN are base counts; 50-kb grid scores are secondary diagnostics, with ambiguous cells reported separately. For each method, choose a threshold using validation data only: maximize recall while keeping estimated validation FDR at or below 5%, preferring the stricter threshold on ties. Freeze the thresholds before test evaluation and report achieved test FDR alongside recall.
 
 The structure-only scenario allows low continuous migration between ancestral
 populations after target/reference divergence, with no recent pulse. Any detections
